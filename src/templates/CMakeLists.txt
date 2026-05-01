@@ -4,6 +4,7 @@ ecm_add_qml_module(KirigamiTemplates URI "org.kde.kirigami.templates"
     VERSION 2.0
     GENERATE_PLUGIN_SOURCE
     INSTALLED_PLUGIN_TARGET KF6KirigamiTemplates
+    NO_LINT # https://qt-project.atlassian.net/browse/QTBUG-145572
 )
 
 set_source_files_properties(AppHeaderSizeGroup.qml PROPERTIES
@@ -14,16 +15,21 @@ ecm_target_qml_sources(KirigamiTemplates SOURCES
     AbstractApplicationHeader.qml
     AbstractCard.qml
     AppHeaderSizeGroup.qml
+    Badge.qml
     Chip.qml
+    Heading.qml
     InlineMessage.qml
+    LinkButton.qml
+    NavigationTabBar.qml
+    NavigationTabButton.qml
     OverlayDrawer.qml
     OverlaySheet.qml
+    InlineViewHeader.qml
 )
 
 ecm_target_qml_sources(KirigamiTemplates PRIVATE PATH private SOURCES
     private/BorderPropertiesGroup.qml
     private/DrawerHandle.qml
-    private/PassiveNotificationsManager.qml
 )
 
 set_target_properties(KirigamiTemplates PROPERTIES

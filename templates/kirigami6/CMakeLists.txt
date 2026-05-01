@@ -5,8 +5,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(%{APPNAMELC} VERSION 0.1)
 
-include(FeatureSummary)
-
 set(QT6_MIN_VERSION 6.5.0)
 set(KF6_MIN_VERSION 6.12.0)
 
@@ -48,7 +46,7 @@ install(FILES org.kde.%{APPNAMELC}.desktop DESTINATION ${KDE_INSTALL_APPDIR})
 install(FILES org.kde.%{APPNAMELC}.metainfo.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
 ki18n_install(po)
 
-feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
+feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
 if (NOT ANDROID)
     file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES src/*.cpp src/*.h)

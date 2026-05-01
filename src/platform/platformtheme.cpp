@@ -8,6 +8,8 @@
 #include "platformtheme.h"
 #include "basictheme_p.h"
 #include "platformpluginfactory.h"
+#include "stylehints.h"
+
 #include <QDebug>
 #include <QDir>
 #include <QFontDatabase>
@@ -24,6 +26,8 @@
 #include <functional>
 #include <memory>
 #include <unordered_map>
+
+#include "kirigamiplatform_logging.h"
 
 namespace Kirigami
 {
@@ -856,20 +860,33 @@ void PlatformTheme::setCustomFocusColor(const QColor &color)
     d->setColor(this, PlatformThemeData::FocusColor, color);
 }
 
+#if KIRIGAMIPLATFORM_BUILD_DEPRECATED_SINCE(6, 24)
 bool PlatformTheme::useAlternateBackgroundColor() const
 {
-    return d->useAlternateBackgroundColor;
+    auto styleHints = qobject_cast<StyleHints *>(qmlAttachedPropertiesObject<StyleHints>(parent(), false));
+    if (styleHints) {
+        return styleHints->useAlternateBackgroundColor();
+    } else {
+        return false;
+    }
 }
 
 void PlatformTheme::setUseAlternateBackgroundColor(bool alternate)
 {
-    if (alternate == d->useAlternateBackgroundColor) {
-        return;
-    }
+    qCDebug(KirigamiPlatform)
+        << "PlatformTheme::setUseAlternateBackgroundColor is deprecated (since 6.24), use StyleHints::setUseAlternateBackgroundColor() instead";
 
-    d->useAlternateBackgroundColor = alternate;
-    Q_EMIT useAlternateBackgroundColorChanged(alternate);
+    auto styleHints = qobject_cast<StyleHints *>(qmlAttachedPropertiesObject<StyleHints>(parent()));
+
+    bool oldAlternate = styleHints->useAlternateBackgroundColor();
+
+    styleHints->setUseAlternateBackgroundColor(alternate);
+
+    if (oldAlternate != styleHints->useAlternateBackgroundColor()) {
+        Q_EMIT useAlternateBackgroundColorChanged(alternate);
+    }
 }
+#endif
 
 QPalette PlatformTheme::palette() const
 {

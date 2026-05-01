@@ -8,7 +8,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Templates as QT
 import QtQuick.Controls as QQC2
-import org.kde.kirigami as Kirigami
+import org.kde.kirigami.controls as KC
+import org.kde.kirigami.platform as Platform
+import org.kde.kirigami.primitives as Primitives
+import org.kde.kirigami.layouts as KL
 import "private/globaltoolbar" as GlobalToolBar
 
 /*!
@@ -115,7 +118,7 @@ QT.Control {
 
       \note Pages can override it using implicitWidth, Layout.fillWidth, Layout.minimumWidth etc.
      */
-    property int defaultColumnWidth: Kirigami.Units.gridUnit * 20
+    property int defaultColumnWidth: Platform.Units.gridUnit * 20
 
     /*!
       \qmlproperty bool PageRow::interactive
@@ -265,15 +268,15 @@ QT.Control {
             return null
         }
         let item;
-        if (Kirigami.Settings.isMobile) {
-            if (QQC2.ApplicationWindow.window.width > Kirigami.Units.gridUnit * 40) {
+        if (Platform.Settings.isMobile) {
+            if (QQC2.ApplicationWindow.window.width > Platform.Units.gridUnit * 40) {
                 // open as a QQC2.Dialog
                 const component = pagesLogic.getMobileDialogLayerComponent();
                 const dialog = component.createObject(QQC2.Overlay.overlay, {
-                    width: Qt.binding(() => QQC2.ApplicationWindow.window.width - Kirigami.Units.gridUnit * 5),
-                    height: Qt.binding(() => QQC2.ApplicationWindow.window.height - Kirigami.Units.gridUnit * 5),
-                    x: Kirigami.Units.gridUnit * 2.5,
-                    y: Kirigami.Units.gridUnit * 2.5,
+                    width: Qt.binding(() => QQC2.ApplicationWindow.window.width - Platform.Units.gridUnit * 5),
+                    height: Qt.binding(() => QQC2.ApplicationWindow.window.height - Platform.Units.gridUnit * 5),
+                    x: Platform.Units.gridUnit * 2.5,
+                    y: Platform.Units.gridUnit * 2.5,
                 });
 
                 if (typeof page === "string") {
@@ -298,7 +301,7 @@ QT.Control {
 
                 // Pushing a PageRow is supported but without PageRow toolbar
                 if (item.globalToolBar && item.globalToolBar.style) {
-                    item.globalToolBar.style = Kirigami.ApplicationHeaderStyle.None
+                    item.globalToolBar.style = KC.ApplicationHeaderStyle.None
                 }
                 Object.defineProperty(item, 'closeDialog', {
                     value: function() {
@@ -306,15 +309,15 @@ QT.Control {
                         dialog.close();
                     }
                 });
-                (item as Item).Kirigami.PageStack.closeDialog.connect(() => dialog.close());
+                (item as Item).KL.PageStack.closeDialog.connect(() => dialog.close());
                 dialog.open();
             } else {
                 // open as a layer
-                if (root.globalToolBar.style !== Kirigami.ApplicationHeaderStyle.Breadcrumb) {
+                if (root.globalToolBar.style !== KC.ApplicationHeaderStyle.Breadcrumb) {
                     properties.globalToolBarStyle = root.globalToolBar.style
                 }
                 item = layers.push(page, properties);
-                item.Kirigami.PageStack.closeDialog.connect(() => layers.pop());
+                item.KL.PageStack.closeDialog.connect(() => layers.pop());
                 Object.defineProperty(item, 'closeDialog', {
                     value: function() {
                         console.warn("Calling closeDialog is deprecated. Use Kirigami.PageStack.closeDialog instead.");
@@ -328,16 +331,16 @@ QT.Control {
                 windowProperties.modality = Qt.WindowModal;
             }
             if (!("height" in windowProperties)) {
-                windowProperties.height = Kirigami.Units.gridUnit * 30;
+                windowProperties.height = Platform.Units.gridUnit * 30;
             }
             if (!("width" in windowProperties)) {
-                windowProperties.width = Kirigami.Units.gridUnit * 50;
+                windowProperties.width = Platform.Units.gridUnit * 50;
             }
             if (!("minimumWidth" in windowProperties)) {
-                windowProperties.minimumWidth = Kirigami.Units.gridUnit * 20;
+                windowProperties.minimumWidth = Platform.Units.gridUnit * 20;
             }
             if (!("minimumHeight" in windowProperties)) {
-                windowProperties.minimumHeight = Kirigami.Units.gridUnit * 15;
+                windowProperties.minimumHeight = Platform.Units.gridUnit * 15;
             }
             if (!("flags" in windowProperties)) {
                 windowProperties.flags = Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint;
@@ -346,11 +349,16 @@ QT.Control {
             const window = windowComponent.createObject(root, windowProperties);
             windowComponent.destroy();
             item = window.pageStack.push(page, properties);
-            (item as Item).Kirigami.PageStack.closeDialog.connect(() => window.close());
+            (item as Item).KL.PageStack.closeDialog.connect(() => window.close());
             Object.defineProperty(item, 'closeDialog', {
                 value: function() {
                     console.warn("Calling closeDialog is deprecated. Use Kirigami.PageStack.closeDialog instead.");
                     window.close();
+                }
+            });
+            window.visibleChanged.connect(() => {
+                if (!window.visible) {
+                    window.destroy();
                 }
             });
         }
@@ -710,8 +718,8 @@ QT.Control {
             bottom: parent.bottom
             topMargin: depth < 2
                         ? globalToolBarUI.height
-                        : currentItem.Kirigami.ColumnView.globalHeader?.height ?? 0
-            bottomMargin: currentItem.Kirigami.ColumnView.globalFooter?.height ?? 0
+                        : currentItem.KL.ColumnView.globalHeader?.height ?? 0
+            bottomMargin: currentItem.KL.ColumnView.globalFooter?.height ?? 0
         }
         // placeholder as initial item
         initialItem: columnViewLayout
@@ -725,13 +733,13 @@ QT.Control {
             item.clip = false
 
             // For layers reparent the global header to the page
-            const header = item.Kirigami.ColumnView.globalHeader
+            const header = item.KL.ColumnView.globalHeader
             header.parent = item
             header.anchors.bottom = item.top
             header.anchors.left = item.left
             header.anchors.right = item.right
 
-            const footer = item.Kirigami.ColumnView.globalFooter
+            const footer = item.KL.ColumnView.globalFooter
             footer.parent = item
             footer.anchors.top = item.bottom
             footer.anchors.left = item.left
@@ -748,7 +756,11 @@ QT.Control {
 
         popEnter: Transition {
             PauseAnimation {
-                duration: Kirigami.Units.longDuration
+                duration: Platform.Units.longDuration
+            }
+            PropertyAction {
+                property: "opacity"
+                value: 1
             }
         }
         popExit: Transition {
@@ -756,13 +768,13 @@ QT.Control {
                 OpacityAnimator {
                     from: 1
                     to: 0
-                    duration: Kirigami.Units.longDuration
+                    duration: Platform.Units.longDuration
                     easing.type: Easing.InOutCubic
                 }
                 YAnimator {
                     from: 0
                     to: height/2
-                    duration: Kirigami.Units.longDuration
+                    duration: Platform.Units.longDuration
                     easing.type: Easing.InCubic
                 }
             }
@@ -775,13 +787,13 @@ QT.Control {
                     property: "opacity"
                     from: 0
                     to: 1
-                    duration: Kirigami.Units.longDuration
+                    duration: Platform.Units.longDuration
                     easing.type: Easing.InOutCubic
                 }
                 YAnimator {
                     from: height/2
                     to: 0
-                    duration: Kirigami.Units.longDuration
+                    duration: Platform.Units.longDuration
                     easing.type: Easing.OutCubic
                 }
             }
@@ -791,7 +803,7 @@ QT.Control {
 
         pushExit: Transition {
             PauseAnimation {
-                duration: Kirigami.Units.longDuration
+                duration: Platform.Units.longDuration
             }
         }
 
@@ -800,13 +812,13 @@ QT.Control {
                 OpacityAnimator {
                     from: 0
                     to: 1
-                    duration: Kirigami.Units.longDuration
+                    duration: Platform.Units.longDuration
                     easing.type: Easing.InOutCubic
                 }
                 YAnimator {
                     from: height/2
                     to: 0
-                    duration: Kirigami.Units.longDuration
+                    duration: Platform.Units.longDuration
                     easing.type: Easing.OutCubic
                 }
             }
@@ -817,13 +829,13 @@ QT.Control {
                 OpacityAnimator {
                     from: 1
                     to: 0
-                    duration: Kirigami.Units.longDuration
+                    duration: Platform.Units.longDuration
                     easing.type: Easing.InCubic
                 }
                 YAnimator {
                     from: 0
                     to: -height/2
-                    duration: Kirigami.Units.longDuration
+                    duration: Platform.Units.longDuration
                     easing.type: Easing.InOutCubic
                 }
             }
@@ -839,7 +851,7 @@ QT.Control {
         }
         z: 100
         property QT.Control pageRow: root
-        active: globalToolBar.actualStyle !== Kirigami.ApplicationHeaderStyle.None || (root.leadingVisibleItem && root.leadingVisibleItem.globalToolBarStyle === Kirigami.ApplicationHeaderStyle.ToolBar)
+        active: globalToolBar.actualStyle !== KC.ApplicationHeaderStyle.None || (root.leadingVisibleItem && root.leadingVisibleItem.globalToolBarStyle === KC.ApplicationHeaderStyle.ToolBar)
         visible: active
         height: active ? implicitHeight : 0
         // If load is asynchronous, it will fail to compute the initial implicitHeight
@@ -1004,7 +1016,7 @@ QT.Control {
             readonly property alias columnView: columnView
             // set the pagestack of this and all children to root, otherwise
             // they would automatically resolve to the layer's stackview
-            Kirigami.PageStack.pageStack: root
+            KL.PageStack.pageStack: root
 
             Item {
                 id: sidebarControl
@@ -1014,7 +1026,7 @@ QT.Control {
                     bottom: parent.bottom
                 }
                 transform: Translate {
-                    x: root.mirrored ? -sidebarControl.Kirigami.ScenePosition.x : 0
+                    x: root.mirrored ? -sidebarControl.Primitives.ScenePosition.x : 0
                 }
                 z: 1
                 width: visible ? root.leftSidebar.width * root.leftSidebar.position : 0
@@ -1022,7 +1034,7 @@ QT.Control {
                 visible: root.leftSidebar && children.length > 0
             }
 
-            Kirigami.ColumnView {
+            KL.ColumnView {
                 id: columnView
                 anchors {
                     left: sidebarControl.right
@@ -1041,7 +1053,7 @@ QT.Control {
                         required property Item page
                         property bool wasDragging
                         readonly property bool active: columnView.moving
-                                    && columnView.columnResizeMode === Kirigami.ColumnView.SingleColumn
+                                    && columnView.columnResizeMode === KL.ColumnView.SingleColumn
                                     && page.background
                                     && (page.background?.color.a === 1 ?? true)
                                     && (columnView.trailingVisibleItem?.background ?? false)
@@ -1052,14 +1064,16 @@ QT.Control {
                                 return 0;
                             }
 
-                            const animDistance = Kirigami.Units.gridUnit * 4;
-                            if (progress < 0) {
-                                return columnView.contentX - page.x;
-                            } else if (!wasDragging && progress > 1e-9) {
-                                return - (columnView.width - animDistance) * Math.min(1,  progress);
+                            const animDistance = Platform.Units.gridUnit * 4;
+                            if (!wasDragging && Math.abs(progress) > 1e-9) {
+                                // Cancel the natural full‑width slide and add a partial offset
+                                return (columnView.contentX - page.x) + animDistance * progress;
                             }
                             return 0;
                         }
+
+                        // Opacity binding: crossfade both pages.
+                        // Fade out when being pushed away, fade in when returning from pop.
                         component OpacityBinding: Binding {
                             target: transitionTransform.page
                             property: "opacity"
@@ -1067,18 +1081,25 @@ QT.Control {
                                 if (transitionTransform.wasDragging || !transitionTransform.active) {
                                     return 1;
                                 }
-                                return Math.min(1, 1 - transitionTransform.progress);
+                                var animProgress = transitionTransform.progress;
+                                if (animProgress > 0) {
+                                    return 1 - Math.min(1, animProgress);
+                                } else if (animProgress < 0) {
+                                    return 1 + Math.min(1, animProgress);
+                                }
+                                return 1;
                             }
                         }
-                        readonly property list<OpacityBinding> __opacityBindings: [
+                        // NOTE: We use list<Binding> here instead of list<OpacityBinding> to work around QTBUG-144092
+                        readonly property list<Binding> __opacityBindings: [
                             OpacityBinding {
                                 target: transitionTransform.page
                             },
                             OpacityBinding {
-                                target: transitionTransform.page.ColumnView.globalHeader
+                                target: transitionTransform.page.KL.ColumnView.globalHeader
                             },
                             OpacityBinding {
-                                target: transitionTransform.page.ColumnView.globalFooter
+                                target: transitionTransform.page.KL.ColumnView.globalFooter
                             }
                         ]
                         readonly property Connections __draggingConnection: Connections {
@@ -1098,21 +1119,21 @@ QT.Control {
 
                 // Internal hidden api for Page
                 readonly property Item __pageRow: root
-                acceptsMouse: Kirigami.Settings.isMobile
-                columnResizeMode: root.wideMode ? Kirigami.ColumnView.FixedColumns : Kirigami.ColumnView.SingleColumn
+                acceptsMouse: Platform.Settings.isMobile
+                columnResizeMode: root.wideMode ? KL.ColumnView.FixedColumns : KL.ColumnView.SingleColumn
                 columnWidth: root.defaultColumnWidth
                 interactive: Qt.platform.os !== 'android'
 
                 onItemInserted: (position, item) => {
                     item.transform = pageTranslation.createObject(item, {page: item});
-                    item.ColumnView.globalHeader.transform = item.transform;
-                    item.ColumnView.globalFooter.transform = item.transform;
+                    item.KL.ColumnView.globalHeader.transform = item.transform;
+                    item.KL.ColumnView.globalFooter.transform = item.transform;
                     root.pageInserted(position, item);
                 }
                 onItemRemoved: item => {
                     item.transform = null;
-                    item.ColumnView.globalHeader.transform = null;
-                    item.ColumnView.globalFooter.transform = null;
+                    item.KL.ColumnView.globalHeader.transform = null;
+                    item.KL.ColumnView.globalFooter.transform = null;
                     root.pageRemoved(item);
                 }
 

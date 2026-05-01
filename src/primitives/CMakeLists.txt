@@ -4,7 +4,9 @@ ecm_add_qml_module(KirigamiPrimitives URI "org.kde.kirigami.primitives"
     VERSION 2.0
     GENERATE_PLUGIN_SOURCE
     INSTALLED_PLUGIN_TARGET KF6KirigamiPrimitives
-    DEPENDENCIES QtQuick org.kde.kirigami.platform
+    DEPENDENCIES
+        QtQuick
+        TARGET KirigamiPlatform
 )
 
 target_sources(KirigamiPrimitives PRIVATE
@@ -18,11 +20,17 @@ target_sources(KirigamiPrimitives PRIVATE
     shadowedrectangle.h
     shadowedtexture.cpp
     shadowedtexture.h
+    scenepositionattached.cpp
+    scenepositionattached.h
 
     scenegraph/shadernode.cpp
     scenegraph/shadernode.h
     scenegraph/shadermaterial.cpp
     scenegraph/shadermaterial.h
+    scenegraph/iconmaterial.cpp
+    scenegraph/iconmaterial.h
+    scenegraph/iconnode.cpp
+    scenegraph/iconnode.h
     scenegraph/softwarerectanglenode.cpp
     scenegraph/softwarerectanglenode.h
     scenegraph/texturecache.cpp

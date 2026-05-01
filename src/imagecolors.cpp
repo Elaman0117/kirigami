@@ -2,7 +2,7 @@
  *  SPDX-FileCopyrightText: 2020 Marco Martin <mart@kde.org>
  *  SPDX-FileCopyrightText: 2024 ivan tkachenko <me@ratijas.tk>
  *
- *  SPDX-License-Identifier: GPL-2.0-or-later
+ *  SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
 #include "imagecolors.h"
@@ -238,9 +238,10 @@ void ImageColors::update()
     if (m_grabResult) {
         connect(m_grabResult.data(), &QQuickItemGrabResult::ready, this, [this, runUpdate]() {
             m_sourceImage = m_grabResult->image();
-            m_grabResult.clear();
             runUpdate();
         });
+        // Workaround for QTBUG-144544
+        connect(m_grabResult.data(), &QQuickItemGrabResult::ready, m_grabResult.data(), [grabResult = m_grabResult] {}, Qt::SingleShotConnection);
     }
 }
 

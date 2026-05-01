@@ -10,7 +10,9 @@ import QtQml
 import QtQuick.Controls as QQC2
 import QtQuick.Templates as T
 
-import org.kde.kirigami as Kirigami
+import org.kde.kirigami.controls as KC
+import org.kde.kirigami.layouts as KL
+import org.kde.kirigami.platform as Platform
 
 QQC2.ToolButton {
     id: control
@@ -21,12 +23,12 @@ QQC2.ToolButton {
 
     display: QQC2.ToolButton.TextBesideIcon
 
-    property bool showMenuArrow: !Kirigami.DisplayHint.displayHintSet(action, Kirigami.DisplayHint.HideChildIndicator)
+    property bool showMenuArrow: !KL.DisplayHint.displayHintSet(action, KL.DisplayHint.HideChildIndicator)
 
     property int position: QQC2.ToolBar.Header
 
     property list<T.Action> menuActions: {
-        return (action as Kirigami.Action)?.children ?? []
+        return (action as KC.Action)?.children ?? []
     }
 
     property Component menuComponent: ActionsMenu {
@@ -65,8 +67,8 @@ QQC2.ToolButton {
         }
     }
 
-    visible: (action as Kirigami.Action)?.visible ?? true
-    autoExclusive: (action as Kirigami.Action)?.autoExclusive ?? false
+    visible: (action as KC.Action)?.visible ?? true
+    autoExclusive: (action as KC.Action)?.autoExclusive ?? false
 
     // Workaround for QTBUG-85941
     Binding {
@@ -100,16 +102,29 @@ QQC2.ToolButton {
     }
 
     QQC2.ToolTip {
-        visible: control.hovered && text.length > 0 && !(control.menu && control.menu.visible) && !control.pressed && !Kirigami.Settings.hasTransientTouchInput
+        visible: control.hovered && text.length > 0 && !(control.menu && control.menu.visible) && !control.pressed && !Platform.Settings.hasTransientTouchInput
         text: {
             const a = control.action;
-            const ka = a as Kirigami.Action
+            const ka = a as KC.Action
             if (a) {
+                let tooltip;
+                // Use the defiend tooltip, otherwise fallback to the action's text where applicable.
+                // If the action has no text (bad!) then display the shortcut if defined. Ultimately display no tooltip in the worst case.
                 if (ka?.tooltip && ka?.tooltip !== ka.text) {
-                    return ka.tooltip;
-                } else if (control.display === QQC2.Button.IconOnly) {
-                    return a.text;
+                    tooltip = ka.tooltip;
+                } else if (a.text && control.display === QQC2.Button.IconOnly) {
+                    tooltip = a.text;
+                } else if (a.shortcut) {
+                    return qsTranslate("@info:tooltip %1 is a keyboard shorcut", "Trigger this action with %1").arg(a.shortcut);
+                } else {
+                    return "";
                 }
+
+                // Add shortcut to an existing tooltip if defined.
+                if (a.shortcut) {
+                    tooltip = qsTranslate("@info:tooltip %1 is the tooltip of an action, %2 is its keyboard shorcut", "%1 (%2)").arg(tooltip).arg(a.shortcut);
+                }
+                return tooltip;
             }
             return "";
         }

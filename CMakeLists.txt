@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.29)
 
-set(KF_VERSION "6.23.0") # handled by release scripts
-set(KF_DEP_VERSION "6.22.0") # handled by release scripts
+set(KF_VERSION "6.26.0") # handled by release scripts
+set(KF_DEP_VERSION "6.26.0") # handled by release scripts
 
 project(kirigami2 VERSION ${KF_VERSION})
 
-set(REQUIRED_QT_VERSION 6.8.0)
+set(REQUIRED_QT_VERSION 6.9.0)
 
 ################# Disallow in-source build #################
 
@@ -20,7 +20,7 @@ option(UBUNTU_TOUCH "Build for Ubuntu Touch" OFF)
 if(DEFINED STATIC_LIBRARY)
     message(FATAL_ERROR "Use the BUILD_SHARED_LIBS=OFF option to build a static library, STATIC_LIBRARY is no longer a supported option")
 endif()
-find_package(ECM 6.22.0 REQUIRED NO_MODULE)
+find_package(ECM 6.26.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
 if (NOT ${BUILD_SHARED_LIBS})
@@ -56,6 +56,8 @@ if(NOT BUILD_SHARED_LIBS)
     add_definitions(-DQT_PLUGIN)
     add_definitions(-DQT_STATICPLUGIN=1)
 endif()
+
+qt_policy(SET QTP0005 NEW)
 
 ################# set KDE specific information #################
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
@@ -125,7 +127,7 @@ endif()
 
 ecm_set_disabled_deprecation_versions(
     QT 6.2
-    KF 6.21.0
+    KF 6.23.0
 )
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
