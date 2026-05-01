@@ -226,10 +226,10 @@ class ShadowedRectangle : public QQuickItem
      * Example usage:
      * \code
      * Kirigami.ShadowedRectangle {
-     *     corners.topLeftRadius: 4
-     *     corners.topRightRadius: 5
-     *     corners.bottomLeftRadius: 2
-     *     corners.bottomRightRadius: 10
+     *     corners.topLeftRadius: Kirigami.Units.cornerRadius
+     *     corners.topRightRadius: Kirigami.Units.cornerRadius * 1.25
+     *     corners.bottomLeftRadius: Kirigami.Units.cornerRadius * 0.5
+     *     corners.bottomRightRadius: Kirigami.Units.cornerRadius * 1.5
      * \endcode
      */
     Q_PROPERTY(CornersGroup *corners READ corners CONSTANT FINAL)

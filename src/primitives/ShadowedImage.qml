@@ -26,7 +26,7 @@ import org.kde.kirigami as Kirigami
   ShadowedImage {
       source: 'qrc:/myKoolGearPicture.png'
 
-      radius: 20
+      radius: Kirigami.Units.cornerRadius
 
       shadow.size: 20
       shadow.xOffset: 5
@@ -35,10 +35,10 @@ import org.kde.kirigami as Kirigami
       border.width: 2
       border.color: Kirigami.Theme.textColor
 
-      corners.topLeftRadius: 4
-      corners.topRightRadius: 5
-      corners.bottomLeftRadius: 2
-      corners.bottomRightRadius: 10
+      corners.topLeftRadius: Kirigami.Units.cornerRadius
+      corners.topRightRadius: Kirigami.Units.cornerRadius * 1.25
+      corners.bottomLeftRadius: Kirigami.Units.cornerRadius * 0.5
+      corners.bottomRightRadius: Kirigami.Units.cornerRadius * 1.5
   }
   \endqml
 
